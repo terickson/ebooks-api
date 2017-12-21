@@ -1,0 +1,62 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ebooks-api
+spec:
+  selector:
+    app: ebooks-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: ebooks-api
+spec:
+  serviceName: ebooks-api
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ebooks-api
+  template:
+    metadata:
+      labels:
+        app: ebooks-api
+    spec:
+      containers:
+      - name: ebooks-api
+        image: ebooks-api
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+        - name: logs
+          mountPath: /usr/app/logs
+        - name: configs
+          mountPath: /usr/app/configs
+      securityContext:
+        fsGroup: 1000
+      volumes:
+      - name: logs
+        nfs:
+          server: kube-u-setup.wwtatc.local
+          path: "/export/logs/ebooks-api/"
+      - name: configs
+        nfs:
+          server: kube-u-setup.wwtatc.local
+          path: "/export/configs/ebooks-api/"
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ebooks-api
+spec:
+  rules:
+  - host: ebooks-api.kube-test.wwtatc.local
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ebooks-api
+          servicePort: 80

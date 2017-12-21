@@ -1,0 +1,10 @@
+[
+  {
+    "href": "/ebooks",
+    "description": "Returns a list ebooks.",
+    "method": "GET",
+    "parameters": "",
+    "body": null,
+    "examples": null
+  }
+]

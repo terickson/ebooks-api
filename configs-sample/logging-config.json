@@ -1,0 +1,17 @@
+{
+  "console": {
+    "level": "debug",
+    "handleExceptions": true,
+    "json": false,
+    "colorize": true,
+    "timestamp":true
+  },
+  "file": {
+    "filename": "logs/ebooks-api.log",
+    "level": "debug",
+    "handleExceptions": true,
+    "json": false,
+    "colorize": true,
+    "timestamp":true
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "es2017",
+    "sourceMap": true,
+    "allowJs": true,
+    "module": "commonjs",
+    "types": ["node", "mocha"],
+    "typeRoots": [ "node_modules/@types", "custom-typings"],
+    "lib": ["es2017"]
+  }
+}
