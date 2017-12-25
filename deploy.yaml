@@ -15,8 +15,7 @@ kind: Deployment
 metadata:
   name: ebooks-api
 spec:
-  serviceName: ebooks-api
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: ebooks-api
@@ -40,12 +39,12 @@ spec:
       volumes:
       - name: logs
         nfs:
-          server: kube-u-setup.wwtatc.local
-          path: "/export/logs/ebooks-api/"
+          server: mordor.home
+          path: "/exports/logs/ebooks-api/"
       - name: configs
         nfs:
-          server: kube-u-setup.wwtatc.local
-          path: "/export/configs/ebooks-api/"
+          server: mordor.home
+          path: "/exports/configs/ebooks-api/"
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -53,7 +52,7 @@ metadata:
   name: ebooks-api
 spec:
   rules:
-  - host: ebooks-api.kube-test.wwtatc.local
+  - host: ebooks-api.apps.home
     http:
       paths:
       - path: /

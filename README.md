@@ -1,6 +1,6 @@
-ebooks-api-api
+ebooks-api
 ===========
-This api is used to get ebook information from my local ebook library and merge it with various sources so that I can easily search my ebook library. This is put together so I can run it on my local Kubernetes cluster and test various aspects of Kubernetes. 
+This api is used to get ebook information.
 
 ### Installation
 1. If you don't already have it install node: I suggest [NVM](https://github.com/creationix/nvm)
