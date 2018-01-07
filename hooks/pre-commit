@@ -4,7 +4,5 @@
 # formatting JSON into Markdown
 # Execute buildGitInfo to populate gitInfo.json with project's git info
 # Add the generated files to your commit
-./buildReadme.sh
 ./buildGitInfo.sh
 git add gitInfo.json
-git add README.md
