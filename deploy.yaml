@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: ebooks-api
-        image: ebooks-api
+        image: <<image>>
         ports:
           - containerPort: 8080
         volumeMounts:

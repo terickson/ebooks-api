@@ -1,24 +1,22 @@
-#Docker build and publish
+#Docker build
 BUILD_NUMBER=`date +%s`
-DOCKER_IMAGE="mordor.home:5000/ebooks-api:$BUILD_NUMBER"
-docker build -t ebooks-api .
+SERVICE_NAME="ebooks-api"
+DOCKER_IMAGE="mordor.home:5000/$SERVICE_NAME:$BUILD_NUMBER"
+DOCKER_IMAGE_SED="mordor.home:5000\\/$SERVICE_NAME:$BUILD_NUMBER"
+docker build -t $SERVICE_NAME .
 compileStatus=$?
 if [ $compileStatus -eq 1 ]; then
   echo "Build failed please review the log"
   exit 1
 fi
-docker tag ebooks-api $DOCKER_IMAGE
+
+#Docker Publish
+docker tag $SERVICE_NAME $DOCKER_IMAGE
 docker push $DOCKER_IMAGE
 
-#Kubernetes redeploy
+#setup deployment yaml in deployment directory
+scp deploy.yaml terickson@mordor.home:deployments/$SERVICE_NAME.yaml
+ssh terickson@mordor.home "sed -i -- 's/<<image>>/$DOCKER_IMAGE_SED/g' deployments/$SERVICE_NAME.yaml"
 
-SetupNeeded=0
-if ssh terickson@mordor.home "/home/terickson/bin/kubectl get pod | grep -q \"ebooks-api\""; then
-    SetupNeeded=-1
-fi
-if [ $SetupNeeded = 0 ]; then
-	  scp deploy.yaml terickson@mordor.home:
-    ssh terickson@mordor.home "/home/terickson/bin/kubectl create -f deploy.yaml"
-    sleep 5
-fi
-ssh terickson@mordor.home "/home/terickson/bin/kubectl set image deploy/ebooks-api ebooks-api=$DOCKER_IMAGE"
+#Kubernetes deploy
+ssh terickson@mordor.home "/home/terickson/bin/kubectl apply -f deployments/$SERVICE_NAME.yaml"
