@@ -34,6 +34,8 @@ spec:
           mountPath: /usr/app/logs
         - name: configs
           mountPath: /usr/app/configs
+        - name: ebooks
+          mountPath: /usr/app/ebooks
       securityContext:
         fsGroup: 1000
       volumes:
@@ -45,6 +47,10 @@ spec:
         nfs:
           server: mordor.home
           path: "/exports/configs/ebooks-api/"
+      - name: ebooks
+        nfs:
+          server: mordor.home
+          path: "/media/Media/ebooks/"
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
