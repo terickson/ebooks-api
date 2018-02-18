@@ -11,7 +11,10 @@ import { logger, skip, stream } from '../utils/logger';
 import { Express, Request, Response, Router } from 'express';
 import * as cors from 'cors';
 import * as _ from 'lodash';
+import { models } from '../models/index';
 let queryParams = require('express-query-params');
+import { ValidationError }  from "sequelize";
+const { ModelHandler } = require('sequelize-handlers');
 const swaggerUi = require('swagger-ui-express');
 
 export let app: Express = express();
@@ -46,6 +49,25 @@ fs.readdirSync(__dirname).filter((file: string) => {
   let name = file.split('-router')[0]
   app.use('/' + name, route);
 });
+
+// generate routes using sequelize-handlers for all models (except for those explicitly exempted)
+let ignoreModelList = [];
+for(let model in models) {
+  if(ignoreModelList.includes(model)){
+    continue;
+  }
+  let pathName = '/' + model + 's';
+  let router: Router = Router();
+  let handler = new ModelHandler(models[model]);
+
+  router.get('/', handler.query());
+  router.post('/', handler.create());
+  router.get('/:id', handler.get());
+  router.put('/:id', handler.update());
+  router.delete('/:id', handler.remove());
+  app.use(pathName, router);
+  routeSetup.addModelSwaggerDoc(pathName, model, models);
+}
 
 let swaggerRouter: Router = Router();
 swaggerRouter.get('/', function(req: Request, res: Response, next: Function) {

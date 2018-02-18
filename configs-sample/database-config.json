@@ -1,0 +1,17 @@
+{
+  "database": "ebooks",
+  "host": "<<host>>",
+  "username":"<<user>>",
+  "password":"<<password>>",
+  "port": "5432",
+  "dialect": "postgres",
+  "logging": true,
+  "force": false,
+  "timezone": "+00:00:00",
+  "pool": {
+    "max": 50,
+    "min": 5,
+    "idle": 20000,
+    "acquire": 20000
+  }
+}
