@@ -102,9 +102,9 @@ async function createBook(metaData){
   for(let authorIdx in metaData['authors']){
       let author = await models.Author.find({ where: {name: metaData['authors'][authorIdx]} });
       if(!author){
-        author = await models.Book.create({name: metaData['authors'][authorIdx]});
+        author = await models.Author.create({name: metaData['authors'][authorIdx]});
       }
-      let authorBook = await models.Author_Book.create({bookId:book.id, authorId:author.id});
+      let authorBook = await models.AuthorBook.create({bookId:book.id, authorId:author.id});
   }
 
   for(let identIdx in metaData['identifiers']){
