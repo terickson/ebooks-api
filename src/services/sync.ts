@@ -3,6 +3,7 @@ import * as xml2js from 'xml2js';
 import {logger} from '../utils/logger'
 import {properties} from '../utils/properties'
 import { models } from '../models/index';
+import { ValidationError, UniqueConstraintError }  from "sequelize";
 
 export function sync()
 {
@@ -39,6 +40,9 @@ function parseOpf(rawData, fileName){
     let rawMetafdata = rawData['package']['metadata'][0];
     for(let rawIdentifierIdx in rawMetafdata['dc:identifier']){
         let rawIdentifier = rawMetafdata['dc:identifier'][rawIdentifierIdx];
+        if (rawIdentifier['$']['opf:scheme'] === "calibre"){
+            continue;
+        }
         if (rawIdentifier['$']['opf:scheme'] === "ISBN"){
             metaData["isbn"] = rawIdentifier['_'];
         }
@@ -84,36 +88,58 @@ function parseOpf(rawData, fileName){
 }
 
 async function createBook(metaData){
-  let book = await models.Book.find({ where: {file: metaData['file']} });
-  if(book){
-    return;
-  }
-  book = await models.Book.create({
-      isbn: metaData['isbn'],
-      file: metaData['file'],
-      title: metaData['title'],
-      description: metaData['description'],
-      publisher: metaData['publisher'],
-      publication_date: metaData['publication_date'],
-      language: metaData['language'],
-      series: metaData["series"],
-      series_index: metaData["series_index"]});
-
-  for(let authorIdx in metaData['authors']){
-      let author = await models.Author.find({ where: {name: metaData['authors'][authorIdx]} });
-      if(!author){
-        author = await models.Author.create({name: metaData['authors'][authorIdx]});
+  try{
+      let book = await models.Book.find({ where: {file: metaData['file']} });
+      if(book){
+        return;
       }
-      let authorBook = await models.AuthorBook.create({bookId:book.id, authorId:author.id});
-  }
+      book = await models.Book.create({
+          isbn: metaData['isbn'],
+          file: metaData['file'],
+          title: metaData['title'],
+          description: metaData['description'],
+          publisher: metaData['publisher'],
+          publication_date: metaData['publication_date'],
+          language: metaData['language'],
+          series: metaData["series"],
+          series_index: metaData["series_index"]});
 
-  for(let identIdx in metaData['identifiers']){
-      let identifier = await models.Identifier.create({bookId:book.id, type: metaData['identifiers'][identIdx]['type'], identifier: metaData['identifiers'][identIdx]['id']});
-  }
+      for(let authorIdx in metaData['authors']){
+          let author = await models.Author.find({ where: {name: metaData['authors'][authorIdx]} });
+          try{
+            if(!author){
+              author = await models.Author.create({name: metaData['authors'][authorIdx]});
+            }
+          }catch(err){
+            if(err instanceof UniqueConstraintError){
+              author = await models.Author.find({ where: {name: metaData['authors'][authorIdx]} });
+            }else{
+              throw err;
+            }
+          }
+          let authorBook = await models.AuthorBook.create({bookId:book.id, authorId:author.id});
+      }
 
-  for(let subIdx in metaData['subjects']){
-      let subject = await models.Subject.create({bookId: book.id, subject: metaData['subjects'][subIdx]});
-  }
+      for(let identIdx in metaData['identifiers']){
+          let identifier = await models.Identifier.create({bookId:book.id, type: metaData['identifiers'][identIdx]['type'], identifier: metaData['identifiers'][identIdx]['id']});
+      }
+
+      for(let subIdx in metaData['subjects']){
+          let subject = await models.Subject.create({bookId: book.id, subject: metaData['subjects'][subIdx]});
+      }
+    }catch(err){
+      if(typeof err.message.array === 'function') {
+        // express-validator error
+        err.message.fields = err.array();
+        logger.error("function based error creating book: ", err.message);
+      } else if(err instanceof UniqueConstraintError){
+        logger.error("Unique Constraint Error creating book: " + JSON.stringify((err as UniqueConstraintError).errors));
+      } else if(err instanceof ValidationError){
+        logger.error("Validation Error creating book: ", err.message);
+      } else {
+        logger.error("Error creating book: ", err);
+      }
+    }
 }
 
 /*

@@ -75,8 +75,19 @@ swaggerRouter.get('/', function(req: Request, res: Response, next: Function) {
 });
 app.use('/', swaggerRouter);
 
-app.use((err: Error, req: Request, res: Response, next: Function) => {
-  let errMsg = {message: err.message || "Server error please contact your administrator"};
-  logger.error("Error During Operation: ", err);
-  return res.status(500).json(errMsg);
+
+// error handler
+app.use((err: any, req: Request, res: Response, next: Function) => {
+  let errMsg: any = {message: err.message || "Server error please contact your administrator"};
+  let statusCode: any = err.statusCode || 500
+
+  if(typeof err.array === 'function') {
+    // express-validator error
+    errMsg.fields = err.array();
+    return res.status(422).json(errMsg);
+  } else if(err instanceof ValidationError){
+    return res.status(422).json(errMsg);
+  } else {
+    return res.status(statusCode).json(errMsg);
+  }
 });

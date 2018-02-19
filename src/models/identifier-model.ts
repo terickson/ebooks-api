@@ -19,8 +19,8 @@ export default function(
   let identifier:any = sequelize.define<IdentifierInstance, IdentifierAttributes>('Identifier', {
     id: { type: dataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     bookId: { type: dataTypes.INTEGER, allowNull: false},
-    type: { type: dataTypes.STRING, allowNull: false, unique: 'book_ident' },
-    identifier: { type: dataTypes.STRING, allowNull: false, unique: 'book_ident' },
+    type: { type: dataTypes.STRING, allowNull: false},
+    identifier: { type: dataTypes.STRING, allowNull: false},
     createdAt: { type: dataTypes.DATE },
     updatedAt: { type: dataTypes.DATE }
   }, {
