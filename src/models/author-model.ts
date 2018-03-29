@@ -4,6 +4,8 @@ import { DataTypes, Sequelize, Instance } from 'sequelize';
 export interface AuthorAttributes {
   id: number;
   name: string;
+  grid: number;
+  rating: number;
 };
 
 export interface AuthorInstance extends Instance<AuthorAttributes> {
@@ -17,6 +19,8 @@ export default function(
   let author: any = sequelize.define<AuthorInstance, AuthorAttributes>('Author', {
     id: { type: dataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     name: { type: dataTypes.STRING, allowNull: false, unique: true },
+    grid: { type: dataTypes.INTEGER, allowNull: true },
+    rating:{ type: dataTypes.DECIMAL, allowNull: true}
   }, {
     indexes: [],
     classMethods: {},

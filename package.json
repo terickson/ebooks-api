@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "activedirectory": "0.7.2",
+    "await-sleep": "0.0.1",
     "body-parser": "1.17.1",
     "compression": "1.6.2",
     "continuation-local-storage": "^3.2.1",
@@ -19,6 +20,7 @@
     "cors": "2.8.3",
     "express": "4.15.2",
     "express-query-params": "^0.3.0",
+    "goodreads-api-node": "0.0.5",
     "morgan": "1.8.1",
     "pg": "^7.4.1",
     "pg-native": "^2.2.0",

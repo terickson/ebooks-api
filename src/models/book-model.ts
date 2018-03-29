@@ -4,12 +4,15 @@ import { DataTypes, Sequelize, Instance } from 'sequelize';
 export interface BookAttributes {
   id: number;
   isbn: string;
+  grid: number;
   file: string;
   title: string;
   series: string;
   series_index: number;
   description: string;
   publisher: string;
+  pages: number,
+  rating:number,
   publication_date: Date;
   language: string;
 };
@@ -25,6 +28,7 @@ export default function(
   let book: any = sequelize.define<BookInstance, BookAttributes>('Book', {
     id: { type: dataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     isbn: { type: dataTypes.STRING, allowNull: true},
+    grid: { type: dataTypes.INTEGER, allowNull: true},
     file: { type: dataTypes.STRING, allowNull: false, unique: true },
     title: { type: dataTypes.STRING, allowNull: false},
     series: { type: dataTypes.STRING, allowNull: true},
@@ -33,6 +37,8 @@ export default function(
     publisher: { type: dataTypes.STRING, allowNull: true},
     publication_date: { type: dataTypes.DATE, allowNull: true},
     language: { type: dataTypes.STRING, allowNull: true},
+    pages: { type: dataTypes.DECIMAL, allowNull: true},
+    rating:{ type: dataTypes.DECIMAL, allowNull: true},
     createdAt: { type: dataTypes.DATE },
     updatedAt: { type: dataTypes.DATE }
   }, {
@@ -45,7 +51,6 @@ export default function(
   book['associate'] = function(books: any): void {
     book.hasMany(books.AuthorBook, {foreignKey: 'bookId'});
     book.hasMany(books.Identifier, {foreignKey: 'bookId'});
-    book.hasMany(books.Rating, {foreignKey: 'bookId'});
     book.hasMany(books.Subject, {foreignKey: 'bookId'});
   };
 

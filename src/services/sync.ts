@@ -2,8 +2,12 @@ import * as fs from 'fs';
 import * as xml2js from 'xml2js';
 import {logger} from '../utils/logger'
 import {properties} from '../utils/properties'
-import { models } from '../models/index';
-import { ValidationError, UniqueConstraintError }  from "sequelize";
+import {models} from '../models/index';
+import {ValidationError, UniqueConstraintError, Op}  from "sequelize";
+import * as goodreads from 'goodreads-api-node';
+import * as sleep from 'await-sleep';
+
+const gr = goodreads(properties.goodreadsInfo);
 
 export function sync()
 {
@@ -33,6 +37,7 @@ export function sync()
         });
       });
   });
+  syncBooksWithGr();
 }
 
 function parseOpf(rawData, fileName){
@@ -142,18 +147,45 @@ async function createBook(metaData){
     }
 }
 
-/*
-def googleInfo(isbn):
-    # https://www.googleapis.com/books/v1/volumes?q=isbn=9781101543290&maxResults=1&key=AIzaSyAhMowOrpIijtT9jD_2T8vipx6v-Zzz4xM
-    pass
+async function syncBooksWithGr(){
+  let books = await models.Book.findAll({ where: {grid: null, isbn: {[Op.ne]: null}}});
+  logger.debug("books to sync with gr " + books.length);
+  for(let book of books){
+    try{
+      await setGrInfo(book);
+      logger.debug("book(" + book.id + ") synced with gr.");
+    }catch(err){
+      logger.error("Error sync book(" + book.id + "): ", err);
+    }
+    await sleep(1000);
+  }
+}
 
+async function setGrInfo(book){
+  if(!book.isbn) return;
+  let params:any = {q: book.isbn};
+  let srResp:any = await gr.searchBooks(params);
+  if(!srResp.search.results.work.best_book.id._){
+    return false;
+  }
+  book.grid = srResp.search.results.work.best_book.id._;
+  let sbResp:any = await gr.showBook(srResp.search.results.work.best_book.id._);
+  book.rating = sbResp.book.average_rating.trim();
+  book.pages = sbResp.book.num_pages.trim()
 
-def goodReadsInfo(isbn):
-    # https://www.goodreads.com/book/isbn/<<isbn>>?key=Ed8MNpTve56VnJB8lVBfA&format=xml
-    # https://www.goodreads.com/work/<<workid>>/series?format=xml&key=Ed8MNpTve56VnJB8lVBfA
-    # key: Ed8MNpTve56VnJB8lVBfA
-    #secret: M2nHcO3T6SS3sd6dY5ErBPpA5LAigpaNlSRib7l0Q
-    #will need at least 1 second sleep
-    pass
-
-*/
+  if(Array.isArray(sbResp.book.series_works.series_work)){
+    for(let series of sbResp.book.series_works.series_work){
+      if(!series.user_position.trim()){
+        continue;
+      }
+      book.series_index = series.user_position.trim();
+      book.series = series.series.title.trim();
+    }
+  }else if(sbResp.book.series_works.series_work){
+    if(sbResp.book.series_works.series_work.user_position.trim()){
+      book.series_index = sbResp.book.series_works.series_work.user_position.trim();
+      book.series = sbResp.book.series_works.series_work.series.title.trim();
+    }
+  }
+  book.save();
+}
