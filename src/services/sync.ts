@@ -165,24 +165,28 @@ async function setGrInfo(book){
   if(!book.isbn) return;
   let params:any = {q: book.isbn};
   let srResp:any = await gr.searchBooks(params);
-  if(!srResp.search.results.work.best_book.id._){
-    return false;
+  if(!srResp.search.results.work){
+    book.grid = -1;
+    book.save();
+    return;
   }
   book.grid = srResp.search.results.work.best_book.id._;
   let sbResp:any = await gr.showBook(srResp.search.results.work.best_book.id._);
   book.rating = sbResp.book.average_rating.trim();
-  book.pages = sbResp.book.num_pages.trim()
+  if(sbResp.book.num_pages.trim()){
+    book.pages = sbResp.book.num_pages.trim();
+  }
 
   if(Array.isArray(sbResp.book.series_works.series_work)){
     for(let series of sbResp.book.series_works.series_work){
-      if(!series.user_position.trim()){
+      if(!series.user_position.trim() || isNaN(series.user_position.trim())){
         continue;
       }
       book.series_index = series.user_position.trim();
       book.series = series.series.title.trim();
     }
   }else if(sbResp.book.series_works.series_work){
-    if(sbResp.book.series_works.series_work.user_position.trim()){
+    if(sbResp.book.series_works.series_work.user_position.trim() && !isNaN(sbResp.book.series_works.series_work.user_position.trim())){
       book.series_index = sbResp.book.series_works.series_work.user_position.trim();
       book.series = sbResp.book.series_works.series_work.series.title.trim();
     }
