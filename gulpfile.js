@@ -40,7 +40,7 @@ gulp.task('server', ['compile'], function() {
 })
 
 gulp.task('watch', ['server'], function() {
-    gulp.watch('./src/**/*.ts', ['server']);
+    gulp.watch(['./src/**/*.ts', './lib/**/*.js'], ['server']);
 });
 
 gulp.task('default', function() {
