@@ -1,0 +1,19 @@
+{
+  "name": "sequelize-handlers",
+  "version": "1.0.5",
+  "description": "A module that simplifies adding RESTful Express handlers for Sequelize models.",
+  "keywords": [
+    "express",
+    "rest",
+    "sequelize",
+    "api",
+    "restful"
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">= 6.11.0"
+  },
+  "dependencies": {
+    "lodash": "^4.13.1"
+  }
+}
