@@ -1,6 +1,7 @@
 FROM node:8
 RUN mkdir -p /usr/app
 WORKDIR /usr/app
+COPY lib /usr/app/lib
 COPY src /usr/app/src
 COPY gitInfo.json gulpfile.js package.json tsconfig.json /usr/app/
 RUN npm config set strict-ssl false
