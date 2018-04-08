@@ -73,7 +73,20 @@ for(let model in models) {
           res.sendStatus(404);
           return;
         }
-        var file = properties.server.ebooksDir + '/' + book.file + '.epub';
+        //default file to epub
+        let fileType = 'epub';
+        if(req.params.fileType){
+          //unless passed
+          fileType = req.params.fileType;
+        }else if(req.headers['user-agent'].indexOf('Silk') !== -1 || req.headers['user-agent'].indexOf('Kindle') !== -1){
+          //or unless its a kindle device
+          fileType = 'azw3';
+        }
+        let file = properties.server.ebooksDir + '/' + book.file + '.' + fileType;
+        if (!fs.existsSync(file)) {
+          res.sendStatus(404);
+          return;
+        }
         res.download(file); // Set disposition and send it.
       },(error)=>{next(error); return;});
     });
