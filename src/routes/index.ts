@@ -65,6 +65,20 @@ for(let model in models) {
   router.get('/:id', handler.get());
   router.put('/:id', handler.update());
   router.delete('/:id', handler.remove());
+
+  if(model === 'Book'){
+    router.get('/:id/download', function(req, res, next){
+      models.Book.find({ where: {id:  req.params.id} }).then((book)=>{
+        if(!book){
+          res.sendStatus(404);
+          return;
+        }
+        var file = properties.server.ebooksDir + '/' + book.file + '.epub';
+        res.download(file); // Set disposition and send it.
+      },(error)=>{next(error); return;});
+    });
+  }
+
   app.use(pathName, router);
   routeSetup.addModelSwaggerDoc(pathName, model, models);
 }
@@ -74,7 +88,6 @@ swaggerRouter.get('/', function(req: Request, res: Response, next: Function) {
    res.json(routeSetup.getSwaggeDoc());
 });
 app.use('/', swaggerRouter);
-
 
 // error handler
 app.use((err: any, req: Request, res: Response, next: Function) => {
