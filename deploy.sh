@@ -19,4 +19,5 @@ scp deploy.yaml terickson@mordor.home:deployments/$SERVICE_NAME.yaml
 ssh terickson@mordor.home "sed -i -- 's/<<image>>/$DOCKER_IMAGE_SED/g' deployments/$SERVICE_NAME.yaml"
 
 #Kubernetes deploy
-ssh terickson@mordor.home "/home/terickson/bin/kubectl apply -f deployments/$SERVICE_NAME.yaml"
+kubectlcmd="/snap/bin/kubectl"
+ssh terickson@mordor.home "$kubectlcmd apply -f deployments/$SERVICE_NAME.yaml"
