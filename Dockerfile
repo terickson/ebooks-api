@@ -8,5 +8,5 @@ RUN npm config set strict-ssl false
 RUN sed -i '/shared-git-hooks/d' ./package.json
 RUN npm install
 RUN node_modules/gulp/bin/gulp.js
-EXPOSE 8080
+EXPOSE 8082
 CMD ["node", "release/server.js"]
